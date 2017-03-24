@@ -1,0 +1,40 @@
+<odoo>
+  <data>
+    <record id="form" model="ir.ui.view">
+      <field name="name">Form View</field>
+      <field name="model">qg_albert.qg_albert</field>
+      <field name="arch" type="xml">
+        <form string="Migration Form">
+          <group>
+            <group>
+              <field name="date" />
+              <field name="purchase_order_process" />
+              <field name="sale_order_process" />
+              <separator  />
+              <br /><br />
+              <button string="Migration" type="object" name="migrate_orders" />
+            </group>
+          </group>
+        </form>
+      </field>
+    </record>
+
+  <!--   <record id="" model="ir.actions.act_window">
+      <field name="name">Migration</field>
+      <field name="res_model">qg_albert.qg_albert</field>
+      <field name="view_mode">form</field>
+      <field name="target">new</field>
+    </record> -->
+    <act_window id="migration_action"
+      name="Migration"
+      res_model="qg_albert.qg_albert"
+      view_mode="form"
+      target="new"
+      key2="client_action_multi"/>
+
+      <menuitem name="Albert Migrator" id="root_menu"/>
+      <menuitem name="Migration" id="top_level_menu_item" parent="root_menu"/>
+      <menuitem name="Migration" id="sub_menu_item" parent="top_level_menu_item" action="migration_action"/>
+
+    </data>
+  </odoo>
