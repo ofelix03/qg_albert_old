@@ -1,6 +1,10 @@
 from odooadapter.odoo_adapter import OdooAdapter
 
 
+global field_key_to_model
+global field_key_to_model_purchase_order_line
+global field_key_to_model_sale_order_line
+
 field_values = {
 	'category_id': {
 		'Sage Unit': 6,
@@ -16,6 +20,18 @@ field_key_to_model = {
 		'selected_fields': 'complete_name,location_id'
 	},
 	'partner_id': {
+		'model': 'res.partner',
+		'filters': 'name',
+		'fields': 'name',
+		'selected_fields': 'name',
+	},
+	'partner_shipping_id': {
+		'model': 'res.partner',
+		'filters': 'name',
+		'fields': 'name',
+		'selected_fields': 'name',
+	},
+	'partner_invoice_id': {
 		'model': 'res.partner',
 		'filters': 'name',
 		'fields': 'name',
@@ -50,31 +66,6 @@ field_key_to_model = {
 		'filters': 'name',
 		'fields': None,
 		'selected_fields': 'name',
-	},
-	'order_line': {
-		'model': 'purchase.order.line',
-		'filters': 'product_id',
-		'selected_fields': 'invoiced,price_unit,product_id,name,date_planned,account_analytic_id,product_qty,product_uom,partner_id,payment_term_id',
-		'fields': {
-			'product_id': {
-				'model': 'product.product',
-				'filters': 'name,active',
-				'fields': 'name,type,uom_id,active',
-				'selected_fields': 'name,type,uom_id,active'
-			},
-			'product_oum': {
-				'model': 'product.uom',
-				'filters': 'name',
-				'fields': 'name,category_id,uom_type,active,rounding',
-				'selected_fields': 'name,category_id,uom_type,active,rounding',
-				},
-			'account_analytic_id': {
-				'model': 'account.analytic.account',
-				'filters': None,
-				'fields': 'name,analytic_date,type,company_id',
-				'selected_fields': 'name,analytic_date,type,company_id'
-			},
-		},
 	},
 	'invoice_ids': {
 		'model': 'account.invoice',
@@ -123,7 +114,69 @@ field_key_to_model = {
 		'filters': None,
 		'fields': None,
 		'selected_fields':'id',
-	}
+	},
+	'warehouse_id': {
+		'model': 'stock.warehouse',
+		'filters': 'name',
+		'fields': 'name,code',
+		'selected_fields':'name,code',
+	},
+}
+
+field_key_to_model_purchase_order_line = {
+	'order_line': {
+		'model': 'purchase.order.line',
+		'filters': 'product_id',
+		'selected_fields': 'invoiced,price_unit,product_id,name,date_planned,account_analytic_id,product_qty,product_uom,partner_id,payment_term_id',
+		'fields': {
+			'product_id': {
+				'model': 'product.product',
+				'filters': 'name,active',
+				'fields': 'name,type,uom_id,active',
+				'selected_fields': 'name,type,uom_id,active'
+			},
+			'product_oum': {
+				'model': 'product.uom',
+				'filters': 'name',
+				'fields': 'name,category_id,uom_type,active,rounding',
+				'selected_fields': 'name,category_id,uom_type,active,rounding',
+				},
+			'account_analytic_id': {
+				'model': 'account.analytic.account',
+				'filters': None,
+				'fields': 'name,analytic_date,type,company_id',
+				'selected_fields': 'name,analytic_date,type,company_id'
+			},
+		},
+	},
+}
+
+field_key_to_model_sale_order_line = {
+	'order_line': {
+		'model': 'sale.order.line',
+		'filters': 'product_id',
+		'selected_fields': 'invoiced,price_unit,product_id,name,date_planned,account_analytic_id,product_qty,product_uom,product_uom_qty,delay,partner_id,payment_term_id',
+		'fields': {
+			'product_id': {
+				'model': 'product.product',
+				'filters': 'name,active',
+				'fields': 'name,type,uom_id,active',
+				'selected_fields': 'name,type,uom_id,active'
+			},
+			'product_oum': {
+				'model': 'product.uom',
+				'filters': 'name',
+				'fields': 'name,category_id,uom_type,active,rounding',
+				'selected_fields': 'name,category_id,uom_type,active,rounding',
+				},
+			'account_analytic_id': {
+				'model': 'account.analytic.account',
+				'filters': None,
+				'fields': 'name,analytic_date,type,company_id',
+				'selected_fields': 'name,analytic_date,type,company_id'
+			},
+		},
+	},
 }
 
 purchase_order_model = {
@@ -132,6 +185,12 @@ purchase_order_model = {
 	'many2many_fields': [],
 	'one2many': [],
 	'selected_fields': ['picking_type_id','date_approve','partner_id', 'currency_id', 'order_line', 'date_order', 'vessel', 'partner_ref', 'state', 'name']
+}
+
+sale_order_model = {
+	'ignore_fields': ['picking_ids', 'shipped_rate', 'invoced_rate', 'minimum_planned_date', 'invoiced', 'amount_tax', 'amount_total', 'shipment_count', 'invoice_count'],
+	'one2many': [],
+	'selected_fields': ['partner_id', 'is_orphan', 'use_deal_price', 'partner_invoice_id', 'partner_shipping_id', 'warehouse_id', 'order_line', 'date_order', 'state', 'name']
 }
 
 
@@ -214,6 +273,7 @@ def create_field_mode_data_using_v8_data(id, model_name, field=None):
 	field_groupings = group_data_by_column_value_per_row([modelData])[0]
 	print("felixMany2one = %s" %field_groupings['many2one'])
 	finalCreateRecord = field_groupings['primitive']
+	print("finalCreatedREcord woudl be = %s" %field_groupings['primitive'])
 	if len(field_groupings['many2one']) > 0:
 		print("HeyYOu")
 		record = {}
@@ -260,9 +320,12 @@ def create_field_mode_data_using_v8_data(id, model_name, field=None):
 		print("finalCreatedRecord = %s" %finalCreateRecord)
 		createdItemId = odooAdapter10.setModel(model_name).createRecord(finalCreateRecord)
 		print("createItemId for model (%s) = %s" %(model_name,createdItemId))
+	else:
+		createdItemId = odooAdapter10.setModel(model_name).createRecord(finalCreateRecord)
+
 
 	
-		return createdItemId
+	return createdItemId
 
 
 def model_data_exists_on_v10(field, data):
@@ -321,13 +384,22 @@ def model_data_exists_on_v10(field, data):
 						modelData[filter_field] = new_value
 
 		filterClause = generate_filter_clause(filter, modelData)
+		print("----------------------")
 		print("Filterclause = %s" %filterClause)
+		print("---------------------------")
 		if filterClause:
 			modelData10 = model10.getRecordsWhere(filter=filterClause, fields=['id'])
-
+			# modelData10 = objectInstance.env['purchase.order'].search(filterClause)
+			print("MYOJBCT = %s" %modelData10)
 			if len(modelData10) > 0:
 				return modelData10[0]['id'] # return only the first record
+				# print("----------------------")
+				# print("MYID = %s" %modelData10.id)
+				# return modelData10.id
 			else:
+				print("//////////////")
+				print("MYWORLD")
+				print("/////////////")
 				return False
 		else:
 			# print("modelData = %s" %modelData)
@@ -583,9 +655,13 @@ def migrate_purchase_orders(orders):
 		5. Now that purchase.order is created, we will update 'order_id' in order_lines which has it's 'id' in 'order_line'
 	"""
 	ordersLines = []
-	createdOrders = []
 	createdOrdersIds = []
+	createdOrdersNames = []
 	index = 0
+	existingOrders = objectInstance.env['purchase.order'].search([])
+	print("Existing Orders = %s" %existingOrders)
+	print("Existing Orders Length = %s" %len(existingOrders))
+
 	for order_groups in orders_groupings:
 		print("==================>>")
 		print("\n\nCreating order")
@@ -596,7 +672,14 @@ def migrate_purchase_orders(orders):
 		record = order_groups['primitive']
 		many2one_fields = order_groups['many2one']
 		many2many_fields = order_groups['many2many']
+		orderName = record['name']
 
+		print("PURCHASE_ORDER = %s" %PURCHASE_ORDER)
+		if objectInstance.is_order_placed(orderName, PURCHASE_ORDER):
+			print("%s already placed " %orderName)
+			continue
+			
+		createdOrdersNames.append(orderName)
 		ordersLines.append(many2many_fields)
 		many2one_field_record = get_fields_id_from_v10(many2one_fields)
 		record.update(many2one_field_record)
@@ -606,7 +689,7 @@ def migrate_purchase_orders(orders):
 
 		orderId = odooAdapter10.setModel('purchase.order').createRecord(record)
 		createdOrder['order_id'] = orderId
-		createdOrdersIds.append(orderId)
+		createdOrdersIds.append(int(orderId))
 		orderLine = get_fields_id_from_v10_for_many2many(many2many_fields, orderId)['order_line']
 		print("orderLine = %s" %orderLine)
 		createdOrder['order_line_ids'] = []
@@ -614,21 +697,163 @@ def migrate_purchase_orders(orders):
 			line.update({"order_id":orderId})
 			createdOrderLineId = odooAdapter10.setModel('purchase.order.line').createRecord(line)
 			createdOrder['order_line_ids'].append(createdOrderLineId)
-
-		createdOrders.append(createdOrders)
 		index += 1
 
-		# Time to confirm all orders
-		# order = confirm_response = objectInstance['purchase.order'].browse(orderId)
-		# print("MYORDEr = %s" %order)
-		# confirm_response = order.button_confirm()
-		# print("\nConfirming order with ID = %s" %orderId)
-		# print("-----------------------------------------")
-		# print("Confirm order response = %s" %confirm_response)
+	return createdOrdersNames
 
-	return createdOrdersIds
+def sales_order_migration_primming():
+	print("sale_order_migration_primming()")
+
+	records = odooAdapter.setModel("product.uom").getRecordsWhere([('name', '=', 'Condensate litres')], fields=['id'])
+	if len(records) > 0:
+		record = records[0]
+		odooAdapter.setModel("product.uom").updateRecord(record['id'], {"name": "Condensate Litres"})
+
+# 	# if 'stock.warehouse' with name 'Tema-Asogli' is not on v10, we create it in v10 
+# 	result = odooAdapter10.setModel('stock.warehouse').getRecordsWhere(filter=[('name', '=', 'Tema-Asogli')])
+# 	if len(result) == 0:
+# 		# it does not exist so we create it in v10
+		
 
 
+	# res.partner with name 'Lonestar Oil Company Limited ' != 'Lonestar Oil Company Limited' on v10.
+	# Fix: strip off the trailing whitespace in v8 to it muchs that of v10
+	# names = {'Central Brent Petroleum ': 'Central Brent Petroleum', 'Lonestar Oil Company Limited ': 'Lonestar Oil Company Limited'}
+	# partnersIn8  = odooAdapter.setModel('res.partner').getRecordsWhere(filter=[], fields=['id', 'name'])
+	# for partner in partnersIn8:
+	# 	id = partner['id']
+	# 	name = partner['name'].strip()
+	# 	odooAdapter.setModel('res.partner').updateRecord(id, {"name": name})
+
+	# for v8name,v10name in names.iteritems():
+	# 	records = odooAdapter.setModel("res.partner").getRecordsWhere(filter=[('name', '=', v8name)], fields=['id'])
+	# 	if len(records) > 0:
+	# 		recordId = records[0]['id']
+	# 		print("recordId = %s" %recordId)
+	# 		result = odooAdapter.updateRecord(recordId, {"name": v10name})
+	# 		print("updat result = %s" %result)
+
+
+def migrate_sale_orders(orders):
+	print("migrating sale orders")
+	orders_groupings = group_data_by_column_value_per_row(orders)
+	# print("groupings = %s" %orders_groupings[0])
+	"""
+		1. Get many2one fields
+		2. Check v10 if it exists there, if yes, get the fields ID, else, we create it from v8's data
+		3. add {key: fieldId} to fieldsBag = {}
+		4. Create purchase.order with fieldsBag
+		5. Now that purchase.order is created, we will update 'order_id' in order_lines which has it's 'id' in 'order_line'
+	"""
+	ordersLines = []
+	createdOrdersIds = []
+	createdOrdersNames = []
+	index = 0
+	# existingOrders = objectInstance.env['purchase.order'].search([])
+	# print("Existing Orders = %s" %existingOrders)
+	# print("Existing Orders Length = %s" %len(existingOrders))
+
+	print("Groupings = %s" %orders_groupings)
+	for order_groups in orders_groupings:
+		print("==================>>")
+		print("\n\nCreating order")
+		print("==================>>")
+		# if index == 1:
+		# 	break
+		createdOrder = {}
+		record = order_groups['primitive']
+		many2one_fields = order_groups['many2one']
+		many2many_fields = order_groups['many2many']
+		orderName = record['name']
+
+		print("PURCHASE_ORDER = %s" %PURCHASE_ORDER)
+		if objectInstance.is_order_placed(orderName, SALE_ORDER):
+			print("%s already placed " %orderName)
+			continue
+			
+		createdOrdersNames.append(orderName)
+		ordersLines.append(many2many_fields)
+		many2one_field_record = get_fields_id_from_v10(many2one_fields)
+		record.update(many2one_field_record)
+		# Change 'state' field value to 'draft'
+		record.pop('state')
+		record.update({'state': 'draft'})
+
+		print("tosave record = %s" %record)
+
+		orderId = odooAdapter10.setModel('sale.order').createRecord(record)
+		createdOrder['order_id'] = orderId
+		print("createdOrderID = %s" %orderId)
+		createdOrdersIds.append(int(orderId))
+		orderLine = get_fields_id_from_v10_for_many2many(many2many_fields, orderId)['order_line']
+		print("orderLine = %s" %orderLine)
+		createdOrder['order_line_ids'] = []
+		for line in orderLine:
+			line.update({"order_id":orderId})
+			createdOrderLineId = odooAdapter10.setModel('sale.order.line').createRecord(line)
+			createdOrder['order_line_ids'].append(createdOrderLineId)
+		index += 1
+
+	return createdOrdersNames
+
+
+def migrate_stock_pickings(orderNames=[], migration_details=None):
+	print("migrate_stock_pickings")
+
+	global odooAdapter
+	global odooAdapter10
+	global objectInstance
+	global PURCHASE_ORDER
+	global SALE_ORDER
+
+	PURCHASE_ORDER = 1
+	SALE_ORDER = 2
+
+	config = migration_details['from']
+	config10 = migration_details['to']
+	order_date = migration_details['order_date']
+	objectInstance = migration_details['object_instance']
+
+	global PurchaseOrder
+	global PurchaseOrderLine
+	PurchaseOrder = objectInstance.env['purchase.order']
+	PurchaseOrderLine = objectInstance.env['purchase.order.line']
+
+	odooAdapter = OdooAdapter().setServerConfig(config).authenticate()
+	odooAdapter10 = OdooAdapter().setServerConfig(config10).authenticate()
+
+	import psycopg2
+	query = """
+		SELECT a.product_id, a.coeff,b.origin
+		FROM picking_product_coeff a
+		INNER JOIN stock_picking b
+		ON b.id=a.picking_id WHERE  b.origin='PO00912'
+	"""
+	dbname = config['database']
+	host = config['url']
+	conn = psycopg2.connect("dbname=%s" %dbname)
+	cursor = conn.cursor()
+
+	CONDENSATE_PRODUCT_TEMPLATE_ID = 3
+	for name in orderNames:
+		cursor.execute(query)
+		results = cursor.fetchall()
+		records = odooAdapter10.setModel("stock.picking").getRecordsWhere(filter=[('origin', '=', name)], fields=['id'])
+
+		if len(records) > 0:
+			pickingId = records[0]['id']
+			if len(results) > 0:
+				for result in results:
+					record = {
+						'product_id': CONDENSATE_PRODUCT_TEMPLATE_ID,
+						'coeff': result[1],
+						'picking_id': pickingId,
+					}
+					print("record = %s" %record)
+					createId = odooAdapter10.setModel("picking.product.coeff").createRecord(record)
+					print("createdId = %s" %createId)
+
+	cursor.close()
 
 def migrate_orders(orders, migration_details=None):
 	print("Starting migrations")
@@ -638,12 +863,19 @@ def migrate_orders(orders, migration_details=None):
 	global odooAdapter
 	global odooAdapter10
 	global objectInstance
+	global PURCHASE_ORDER
+	global SALE_ORDER
+
+	PURCHASE_ORDER = 1
+	SALE_ORDER = 2
+
 	config = migration_details['from']
 	config10 = migration_details['to']
 	order_date = migration_details['order_date']
 	objectInstance = migration_details['object_instance']
-	is_migrate_purchase_orders = migration_details['migrate_purchase_orders']
-	is_migrate_sale_orders = migration_details['migrate_sale_orders']
+
+	can_run_purchase_migration = migration_details['run_purchase_orders_migration']
+	can_run_sale_migration = migration_details['run_sale_orders_migration']
 
 	global PurchaseOrder
 	global PurchaseOrderLine
@@ -652,10 +884,33 @@ def migrate_orders(orders, migration_details=None):
 
 	odooAdapter = OdooAdapter().setServerConfig(config).authenticate()
 	odooAdapter10 = OdooAdapter().setServerConfig(config10).authenticate()
-	print("Date ORDER = %s" %order_date)
-	orders = odooAdapter.setModel('purchase.order').getRecordsWhere(filter=[('date_order', ">=", order_date), ('date_order', '<=', order_date), ('state', '=', 'done')], fields=purchase_order_model['selected_fields'])
-	createdOrdersIds = migrate_purchase_orders(orders)
+	createdOrderNames = {
+		"sales": [],
+		"purchases": [],
+	}
+
+	if can_run_purchase_migration:
+		field_key_to_model.update(field_key_to_model_purchase_order_line)
+		orders = odooAdapter.setModel('purchase.order').getRecordsWhere(filter=[('date_order', ">=", order_date), ('date_order', '<=', order_date), ('state', '=', 'done')], fields=purchase_order_model['selected_fields'])
+		purchase_orders_names = migrate_purchase_orders(orders)
+		print("pruchase_order_names = %s" %purchase_orders_names)
+		createdOrderNames['purchases'] =  purchase_orders_names or []
+	# orders = odooAdapter10.setModel('purchase.order').getRecordsWhere(filter=[('name', 'in', createdOrdersNames)])
+	# print("Length = %s" %len(orders))
+
+	# anotherOrder = objectInstance.env['purchase.order'].search([('name', 'in', createdOrdersNames)])
+	# print("another = %s" %anotherOrder)
 	
-	return createdOrdersIds
+
+	if can_run_sale_migration:
+		field_key_to_model.update(field_key_to_model_sale_order_line)
+		sale_orders = odooAdapter.setModel('sale.order').getRecordsWhere(filter=[('date_order', ">=", order_date), ('state', '=', 'done'), ('date_order', '<=', order_date)], fields=sale_order_model['selected_fields'])
+		print("sale_orders count = %s" %len(sale_orders))
+		sale_orders_names = migrate_sale_orders(sale_orders)
+		print("sale_orders_names = %s" %sale_orders_names)
+		createdOrderNames['sales'] = sale_orders_names or []
+
+	return createdOrderNames
+
 
 

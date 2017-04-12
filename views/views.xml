@@ -5,36 +5,40 @@
       <field name="model">qg_albert.qg_albert</field>
       <field name="arch" type="xml">
         <form string="Migration Form">
+          <header>
+         <!--   <button string="Migration" type="object" name="migrate_orders" attrs="{'invisible':['|',('purchase_order_process','=',false),('sale_order_process','=',false)]}" />
+           <button string="Confirm" type="object" name="confirm_orders" attrs="{'invisible':['|',('purchase_order_process','=',false),('sale_order_process','=',false)]}"/>
+           <button string="Receive" type="object" name="receive_orders" />
+           <button string="Migration" type="object" name="migrate_orders" />
+           <button string="Confirm" type="object" name="confirm_orders" />
+           <button string="Receive" type="object" name="receive_orders" /> -->
+<!--             <button string="Process State" type="object" name="process_state" attrs="{'invisible':[('state','=','done')]}"/>
+ -->            <field name="state" widget="statusbar" nolabel="1" status_bar_visible="mig_po,conf_po,recv_po,mig_so,conf_so,recv_so,done"/>
+         </header>
+         <group>
           <group>
-            <group>
-              <field name="date" />
-              <field name="purchase_order_process" />
-              <field name="sale_order_process" />
-              <separator  />
-              <br /><br />
-              <button string="Migration" type="object" name="migrate_orders" />
-            </group>
+            <field name="date" />
+            <field name="purchase_order_process" invisible="True"/>
+            <field name="sale_order_process" invisible="True"/>            
           </group>
-        </form>
-      </field>
-    </record>
+        </group>
+        <footer>
+          <button string="Process State" type="object" name="process_state" attrs="{'invisible':[('state','=','done')]}"/>
+        </footer>
+      </form>
+    </field>
+  </record>
 
-  <!--   <record id="" model="ir.actions.act_window">
-      <field name="name">Migration</field>
-      <field name="res_model">qg_albert.qg_albert</field>
-      <field name="view_mode">form</field>
-      <field name="target">new</field>
-    </record> -->
-    <act_window id="migration_action"
-      name="Migration"
-      res_model="qg_albert.qg_albert"
-      view_mode="form"
-      target="new"
-      key2="client_action_multi"/>
 
-      <menuitem name="Albert Migrator" id="root_menu"/>
-      <menuitem name="Migration" id="top_level_menu_item" parent="root_menu"/>
-      <menuitem name="Migration" id="sub_menu_item" parent="top_level_menu_item" action="migration_action"/>
+  <record id="migration_action" model="ir.actions.act_window">
+    <field name="name">Migration</field>
+    <field name="res_model">qg_albert.qg_albert</field>
+    <field name="view_mode">form</field>
+  </record>
+  <menuitem name="Albert Migrator" id="root_menu"/>
+  <menuitem name="Migration" id="top_level_menu_item" parent="root_menu"/>
+  <menuitem name="Migration" id="sub_menu_item" parent="top_level_menu_item" />
+  <menuitem name="Migration" id="another_sub_menu_item" parent="sub_menu_item" action="migration_action"/>
 
-    </data>
-  </odoo>
+</data>
+</odoo>
